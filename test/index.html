@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]> <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>    <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>    <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+<head>
+    <meta charset="utf-8">
+
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
+    <title>JS tests</title>
+    <meta name="description" content="tests">
+
+    <meta name="viewport" content="width=device-width">
+    <script type="text/javascript" src="qunit/qunit/qunit.js"></script>
+<link rel="stylesheet" href="qunit/qunit/qunit.css" type="text/css" media="screen" />
+</head>
+<body>
+  <div>
+    <script type="text/javascript">
+    (function(){
+      var anchor = {
+        href: 'index.html?compiled=true',
+        value: 'Compiled Mode'
+      };
+      if(QUnit.urlParams.compiled) {
+        anchor.href = 'index.html';
+        anchor.value = 'Uncompiled Mode';
+      }
+      document.write('<a href="' + anchor.href + '">' + anchor.value + '<\/a>');
+    })();
+    </script>
+  </div>
+    <h1 id="qunit-header">Unit Tests</h1>
+     <h2 id="qunit-banner"></h2>
+     <div id="qunit-testrunner-toolbar"></div>
+     <h2 id="qunit-userAgent"></h2>
+     <ol id="qunit-tests"></ol>
+     <div id="qunit-fixture">test markup, will be hidden</div>
+
+     <script type="text/javascript">
+     (function(){
+
+       if(QUnit.urlParams.compiled) {
+         document.write("<script src='..\/dist\/ready.min.js'><\/script>");
+       } else {
+         document.write("<script src='..\/closure-library\/closure\/goog\/base.js'><\/script>");
+         document.write("<script src='..\/lib\/deps.js'><\/script>");
+         document.write("<script src='..\/lib\/ready.js'><\/script>");
+         document.write("<script src='..\/lib\/ready.export.js'><\/script>");
+       }
+
+     })();
+     </script>
+    <script type="text/javascript" src="unit/ready.test.js"></script>
+</body>
+</html>
