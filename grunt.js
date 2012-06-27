@@ -31,7 +31,7 @@ module.exports = function(grunt)
        // any name that describes your operation
       targetName: {
         closureLibraryPath: 'closure-library', // path to closure library
-        files: ['lib/name.js', 'lib/name.export.js'],
+        files: ['lib/ready.js', 'lib/ready.export.js'],
         output_file: 'lib/deps.js'
       }
     },

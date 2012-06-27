@@ -9,7 +9,7 @@ Watches over multiple async operations and triggers listeners when all or some a
 
 [Check out the source](https://github.com/thanpolas/server2js/blob/master/lib/ready.js).
 
-Or clone the repo with `git clone git@github.com:thanpolas/ready.js.git`.
+Or clone the repo with `git clone https://github.com/thanpolas/ready.js.git`.
 
 ## Documentation
 _(Coming soon)_
