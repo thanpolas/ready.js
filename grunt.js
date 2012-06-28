@@ -12,34 +12,37 @@ module.exports = function(grunt)
         output_file: 'build/ready.concatenated.js',
         root: ['lib/', 'closure-library/'],
         output_mode: 'script'
-      }
-    },
-    closureCompiler: {
-      target: {
-        closureCompiler: '../closure_compiler/superstartup-compiler/build/sscompiler.jar',
-        js: ['closure-library/closure/goog/base.js', 'lib/ready.export.js', 'lib/ready.js'],
+      },
+      compile: {
+        closureLibraryPath: 'closure-library',
+        inputs: ['lib/ready.export.js'],
+        namespaces: ['ss.ready', 'ss.ready.compiled'],
+        root: ['lib/', 'closure-library'],
+        compile: true,
+        compiler:  '../../closure-compiler/superstartup-compiler/build/sscompiler.jar',
         output_file: 'dist/ready.min.js',
-        options: {
+        compiler_options: {
           compilation_level: 'ADVANCED_OPTIMIZATIONS',
+          define: ["'goog.DEBUG=false'"],
           warning_level: 'verbose',
           summary_detail_level: 3,
-          output_wrapper: '"(function(){%output%}).call(this);"'
+          output_wrapper: '(function(){%output%}).call(this);'
         }
       }
     },
     closureDepsWriter: {
        // any name that describes your operation
-      targetName: {
+       targetName: {
         closureLibraryPath: 'closure-library', // path to closure library
         files: ['lib/ready.js', 'lib/ready.export.js'],
         output_file: 'lib/deps.js'
       }
     },
-		qunit: {
-			files: "test/index.html"
-		}
-  });
+    qunit: {
+     files: "test/index.html"
+   }
+ });
 
   // Default task.
-  grunt.registerTask('default', 'closureCompiler');
+  grunt.registerTask('default', 'closureBuilder:compile');
 };

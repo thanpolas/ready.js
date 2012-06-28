@@ -7,7 +7,7 @@ Watches over multiple async operations and triggers listeners when all or some a
 ## Getting Started
 [Get the latest version (0.1.0)](https://github.com/thanpolas/ready.js/raw/master/dist/ready.min.js).
 
-[Check out the source](https://github.com/thanpolas/server2js/blob/master/lib/ready.js).
+[Check out the source](https://github.com/thanpolas/ready.js/blob/master/lib/ready.js).
 
 Or clone the repo with `git clone https://github.com/thanpolas/ready.js.git`.
 

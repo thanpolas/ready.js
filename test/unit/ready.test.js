@@ -29,7 +29,7 @@ var getParams = function(opt_JSON)
 };
 
 test('Core functionality', function() {
-  expect( 8 );
+  expect( 9 );
 
   stop();
 
@@ -48,8 +48,12 @@ test('Core functionality', function() {
   }
   function hookFour()
   {
-    ok(true, 'Listener Four executed');
-    start();    
+    ok(true, 'Listener Four executed');    
+  }  
+
+  function hookFive()
+  {
+    ok(true, 'Listener Five executed');    
   }  
 
   ss.ready(hookOne);
@@ -78,6 +82,11 @@ test('Core functionality', function() {
   niam.check('task2');
 
   ok(niam.isDone(), 'Ready watch is now done');
+
+  // a done ready watch should execute synchronously the listener
+  niam.addListener(hookFive);
+
+  start();
 });
 
 
