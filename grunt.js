@@ -2,7 +2,7 @@ module.exports = function(grunt)
 {
 
   grunt.loadNpmTasks('grunt-closure-tools');
-  
+
   // Project configuration.
   grunt.initConfig({
     closureBuilder: {
@@ -23,7 +23,7 @@ module.exports = function(grunt)
         output_file: 'dist/ready.min.js',
         compiler_options: {
           compilation_level: 'ADVANCED_OPTIMIZATIONS',
-          define: ["'goog.DEBUG=false'"],
+          define: ["'goog.DEBUG=false'", "'ss.STANDALONE=true'"],
           warning_level: 'verbose',
           summary_detail_level: 3,
           output_wrapper: '(function(){%output%}).call(this);'

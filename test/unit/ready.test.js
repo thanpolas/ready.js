@@ -41,20 +41,20 @@ test('Core functionality', function() {
   {
     ok(true, 'Listener Two executed');
   }
-  
+
   function hookThree()
   {
     ok(true, 'Listener Three executed');
   }
   function hookFour()
   {
-    ok(true, 'Listener Four executed');    
-  }  
+    ok(true, 'Listener Four executed');
+  }
 
   function hookFive()
   {
-    ok(true, 'Listener Five executed');    
-  }  
+    ok(true, 'Listener Five executed');
+  }
 
   ss.ready(hookOne);
 
@@ -67,18 +67,18 @@ test('Core functionality', function() {
   // add our listeners
   main.addListener(hookTwo);
   main.addListener(hookThree);
-  
+
   ok(!main.isDone(), 'Ready watch is not done yet');
 
   // complete the checks
   ok(!main.isDoneCheck('task1'), 'task 1 is not done yet');
   main.check('task1');
   ok(main.isDoneCheck('task1'), 'task 1 is now done');
-  
+
   // get main watch in another variable
   var niam = ss.ready('main');
   niam.addListener(hookFour);
-  
+
   niam.check('task2');
 
   ok(niam.isDone(), 'Ready watch is now done');
@@ -244,26 +244,52 @@ test('Multiple Ready Watches', function() {
     r.check('task2');
     r.check('task3');
   }
-  
+
 
 });
 
-test('Exceptional cases', function() {
-  
-  raises(function(){
-    var r = ss.ready();
-  }, TypeError, 'No params on ready init should raise TypeError');
-  
-  raises(function(){
-    var r = ss.ready({});
-  }, TypeError, 'Object parameter passed on ready init should raise TypeError');
+test('Late hooks on ready watches', function(){
+  expect( 2 );
+  function readyOne() {
+    ok(true, 'Lazy ready watch should be executed');
+  }
 
-  raises(function(){
-    var r = ss.ready([]);
-  }, TypeError, 'Array parameter passed on ready init should raise TypeError');
+  function checkOne() {
+    ok(true, 'Lazy check should be executed');
+  }
 
-  raises(function(){
-    var r = ss.ready(true);
-  }, TypeError, 'Boolean parameter passed on ready init should raise TypeError');  
-  
+  var r = ss.ready('a-watch');
+  r.addCheck('a-check');
+
+  // finish the ready watch
+  r.check('a-check');
+
+  // now add listeners after the watch is done
+  r.addListener(readyOne);
+  r.addCheckListener('a-check', checkOne);
 });
+
+
+test('Checks as function', function(){
+  expect( 2 );
+  function readyOne() {
+    ok(true, 'Watch should be executed');
+  }
+
+  function checkOne() {
+    ok(true, 'Check should be executed');
+  }
+
+  var r = ss.ready('aWatch');
+  var oddName = 'dashes-not-allowed-as-func-names';
+  r.addCheck('aCheck');
+  r.addCheck(oddName);
+  r.addListener(readyOne);
+  r.addCheckListener('aCheck', checkOne);
+
+  // execution on an instance
+  r.aCheck();
+  // execution from builder
+  ss.ready('aWatch')[oddName]();
+});
+
