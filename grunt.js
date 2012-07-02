@@ -9,7 +9,7 @@ module.exports = function(grunt)
       build: {
         closureLibraryPath: 'closure-library',
         inputs: ['lib/ready.export.js'],
-        output_file: 'dist/ready.concat.js',
+        output_file: 'dist/ready.node.js',
         root: ['lib/', 'closure-library/'],
         output_mode: 'script'
       },
@@ -23,7 +23,8 @@ module.exports = function(grunt)
         output_file: 'dist/ready.min.js',
         compiler_options: {
           compilation_level: 'ADVANCED_OPTIMIZATIONS',
-          define: ["'goog.DEBUG=false'", "'ss.STANDALONE=true'"],
+          define: ["'goog.DEBUG=false'", "'ss.STANDALONE=true'", "'ss.NODEJS=false'"],
+          externs: 'build/node.extern.js',
           warning_level: 'verbose',
           summary_detail_level: 3,
           output_wrapper: '(function(){%output%}).call(this);'
