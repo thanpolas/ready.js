@@ -8,8 +8,8 @@ module.exports = function(grunt)
     closureBuilder: {
       build: {
         closureLibraryPath: 'closure-library',
-        inputs: ['lib/name.export.js'],
-        output_file: 'build/ready.concatenated.js',
+        inputs: ['lib/ready.export.js'],
+        output_file: 'dist/ready.concat.js',
         root: ['lib/', 'closure-library/'],
         output_mode: 'script'
       },
@@ -28,6 +28,22 @@ module.exports = function(grunt)
           summary_detail_level: 3,
           output_wrapper: '(function(){%output%}).call(this);'
         }
+      },
+      node: {
+        closureLibraryPath: 'closure-library',
+        inputs: ['lib/ready.export.js'],
+        namespaces: ['ss.ready', 'ss.ready.compiled'],
+        root: ['lib/', 'closure-library'],
+        compile: true,
+        compiler:  '../../closure-compiler/superstartup-compiler/build/sscompiler.jar',
+        output_file: 'dist/ready.node.js',
+        compiler_options: {
+          compilation_level: 'WHITESPACE_ONLY',
+          define: ["'goog.DEBUG=false'", "'ss.STANDALONE=true'"],
+          warning_level: 'verbose',
+          summary_detail_level: 3,
+          formatting: 'PRETTY_PRINT'
+        }
       }
     },
     closureDepsWriter: {
@@ -40,7 +56,10 @@ module.exports = function(grunt)
     },
     qunit: {
      files: "test/index.html"
-   }
+    },
+    test: {
+      all: "test/unit/ready.test.js"
+    }
  });
 
   // Default task.
