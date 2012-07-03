@@ -6,7 +6,7 @@ module.exports = function(grunt)
   // Project configuration.
   grunt.initConfig({
     closureBuilder: {
-      build: {
+      buildNode: {
         closureLibraryPath: 'closure-library',
         inputs: ['lib/ready.export.js'],
         output_file: 'dist/ready.node.js',
@@ -19,29 +19,30 @@ module.exports = function(grunt)
         namespaces: ['ss.ready', 'ss.ready.compiled'],
         root: ['lib/', 'closure-library'],
         compile: true,
-        compiler:  '../../closure-compiler/superstartup-compiler/build/sscompiler.jar',
+        compiler: '../../closure-compiler/superstartup-compiler/build/sscompiler.jar',
         output_file: 'dist/ready.min.js',
         compiler_options: {
           compilation_level: 'ADVANCED_OPTIMIZATIONS',
-          define: ["'goog.DEBUG=false'", "'ss.STANDALONE=true'", "'ss.NODEJS=false'"],
+          define: ["'goog.DEBUG=false'", "'ss.STANDALONE=true'"],
           externs: 'build/node.extern.js',
           warning_level: 'verbose',
           summary_detail_level: 3,
           output_wrapper: '(function(){%output%}).call(this);'
         }
       },
-      node: {
+      compileNode: {
         closureLibraryPath: 'closure-library',
         inputs: ['lib/ready.export.js'],
         namespaces: ['ss.ready', 'ss.ready.compiled'],
         root: ['lib/', 'closure-library'],
         compile: true,
-        compiler:  '../../closure-compiler/superstartup-compiler/build/sscompiler.jar',
-        output_file: 'dist/ready.node.js',
+        compiler: '../../closure-compiler/superstartup-compiler/build/sscompiler.jar',
+        output_file: 'dist/ready.node.min.js',
         compiler_options: {
-          compilation_level: 'WHITESPACE_ONLY',
-          define: ["'goog.DEBUG=false'", "'ss.STANDALONE=true'"],
+          compilation_level: 'ADVANCED_OPTIMIZATIONS',
+          define: ["'goog.DEBUG=false'", "'ss.STANDALONE=true'", "'NODEJS=true'"],
           warning_level: 'verbose',
+          externs: 'build/node.extern.js',
           summary_detail_level: 3,
           formatting: 'PRETTY_PRINT'
         }
