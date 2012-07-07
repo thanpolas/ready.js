@@ -1,3 +1,12 @@
+
+// check for node.js
+if (NODE) {
+  var ss = {
+    ready: require('../../dist/ready.node.js')
+  };
+}
+
+
 module('ss.ready', {
   setup: function(){
     ss.ready.reset();

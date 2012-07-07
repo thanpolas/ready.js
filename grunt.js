@@ -5,6 +5,18 @@ module.exports = function(grunt)
 
   // Project configuration.
   grunt.initConfig({
+
+    concat: {
+      node: {
+        src: ['lib/ready.node.js', 'lib/ready.js', 'lib/ready.export.js'],
+        dest: 'dist/ready.node.js'
+      },
+      nodeTests: {
+        src: ['node_modules/qunit2node/lib/qunit2node.js', 'test/unit/ready.test.js'],
+        dest: 'test/unit/ready.node.test.js'
+      }
+    },
+
     closureBuilder: {
       buildNode: {
         closureLibraryPath: 'closure-library',
@@ -57,13 +69,20 @@ module.exports = function(grunt)
       }
     },
     qunit: {
-     files: "test/index.html"
+     files: 'test/index.html'
     },
     test: {
-      all: "test/unit/ready.test.js"
+      all: 'test/unit/ready.node.test.js'
     }
  });
 
   // Default task.
   grunt.registerTask('default', 'closureBuilder:compile');
+
+  // node concat ops
+  grunt.registerTask('nodecat', 'concat:node concat:nodeTests');
+
+  // node concat and test ops
+  grunt.registerTask('nodetest', 'nodecat test');
+
 };
