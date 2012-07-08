@@ -27,11 +27,9 @@ var ready = require('asyncready.js');
 
 ## The Concept
 
-ready.js has ** ready watches**. Each *watch* can have one or multiple **checks**.
-
-All *Checks* have to finish in order to complete a *watch*.
-
-We can attach listeners on the completion of a single *check* or the completion of the whole *ready watch*, when all *cheks* are done.
+* ready.js has **ready watches**. Each *watch* can have one or multiple **checks**.
+* All *Checks* have to finish in order to complete a *watch*.
+* Listeners can be attached  on the completion of a single *check* or the completion of the whole *ready watch*, when all *cheks* are done.
 
 Assume we have 4 asynchronous operations that need to run, and we want to execute xyz methods when all 4 complete.
 
