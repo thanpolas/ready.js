@@ -2,7 +2,7 @@
 
 Watches over multiple async operations and triggers listeners when all or some are complete.
 
-At only 815bytes (gzip) ready.js is a powerfull tiny library that alllows you to manage and monitor multiple asynchronous operations, giving you total control on the execution flow of your application.
+At only 815bytes (gzip) ready.js is a powerfull and tiny library that alllows you to manage and monitor multiple asynchronous operations, giving you total control on the execution flow of your application.
 
 ready.js runs both on the browser and node.js
 
@@ -28,17 +28,17 @@ var ss = { ready: require('asyncready.js') };
 
 ## The Story
 
-ready.js has **watches** which have **checks** that have to be *checked* in order to complete a *watch*. We can attach listeners on the completion of a single *check* or the completion of the whole *ready watch*.
+ready.js has **watches** which have **checks**. All *Checks* have to be *checked* in order to complete a *watch*. We can attach listeners on the completion of a single *check* or the completion of the *ready watch*, when all *cheks* are done.
 
-Let's say we have 4 asynchronous operations that need to run, in any order, and we want to execute xyz methods when all 4 complete.
+Assume we have 4 asynchronous operations that need to run, and we want to execute xyz methods when all 4 complete.
 
-We will create a ready watch, let's name it `jobDone`.
+We will create a *ready watch*, let's name it `jobDone`.
 
 ```javascript
 var r = ss.ready('jobDone');
 ```
 
-As per our scenario, we want to watch the execution of 4 async operations. Let's say they are 2 db writes, 1 db read and 1 file operation. We'll have to create the 4 *checks* to inform the *ready watch* what to expect.
+As per our scenario, we want to watch the execution of 4 async operations. Say they are 2 db writes, 1 db read and 1 file operation. We'll have to create 4 *checks*.
 
 ```javascript
 // our ready watch was stored in var r
@@ -46,14 +46,14 @@ r.addCheck('db_write_one');
 
 // we can get the same ready watch every time we call ss.ready('jobDone')
 ss.ready('jobDone')
-    .addCheck('db_write_two');
+    .addCheck('db_write_two'); // ... and chain our method calls
 
 // addCheck methods can be chained
 r.addCheck('db_read_one')
     .addCheck('file_op_one');
 ```
 
-At this point we have setup our *ready watch* and what is expectated to complete before the *watch* is finished. Let's add some listeners on the *watch* that will trigger when everything has finished.
+So, at this point we have set our *ready watch* ('jobDone') and added 4 *checks* ('db_write_one', 'db_write_two', 'db_read_one' and 'file_op_one'). Let's add some listeners on the *watch* that will trigger when everything has finished.
 
 ```javascript
 // As per our scenario we want to execute xyz methods when
