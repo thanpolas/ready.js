@@ -110,9 +110,281 @@ And that was it. Once all 4 *checks* are done the *ready watch* will execute all
 
 In the browser, you can find ready.js in the `ss.ready` namespace, or as mentioned above, if you run on node.js do a `require('asyncready.js');` to get the library.
 
-### ss.ready(name|function, opt_forceInit)
+### ss.ready(name | function, opt_forceInit | opt_delay)
+
+`ss.ready` creates a new *ready* instance or returns an existing one if previously initialized.
+
+If the first parameter is a *function* then `ss.ready` poses as `[.addListener](#.addListener_fn_opt_delay)` and attaches to the **'main'** watch. The *main watch* is hardcoded into the library and uses the name `main`.
+
+You can access the default *'main'* ready watch with `ss.ready('main')` or plainly `ss.ready()`
+
+The `opt_forceInit` option is a boolean which if set to true, will force re-initialization of the *watch*. A nice example of how to use it can be found in the ##################.
+
+### .addCheck(checkId)
+
+`.addCheck(checkId)` adds a *check* to the *ready watch*. Make sure `checkId` is a string or has a `.toString()` method.
+
+Each *check* that is added has to be *checked* (aka finished) with the [check](#check) call.
+
+`addCheck` returns the self instance so you can chain it.
+
+Every *check* you add creates a method in the instance using the `checkId` parameter, which equates to `.check(checkId)`. See the example...
+
+```javascript
+var r = ss.ready('authDone');
+r.addCheck('facebookDone');
+
+r.addCheck('twitterDone')
+    // let's try chaining...
+    .addCheck('localDone');
+
+/* Do you stuff, add listeners, etc */
+
+// facebook finished
+r.check('facebookDone');
+
+// twitter finished, use the method to declare it's done
+r.twitterDone();
+// do the same with local auth
+r.localDone();
+
+```
+
+### .check(checkId)
+
+`.check(checkId)` declares that a *check* has finished.
+
+`check` returns the self instance so you can chain it.
+
+`check` can trigger listener execution if it's the last one of the *checks* to finish or if we have attached a [checkListener](#checklistener) for this check.
+
+### .addListener(fn, opt_delay)
+
+Adds a listener for the completion of the current *ready watch*. `fn` has to be a function and `opt_delay` is an optional number which indicates delay in execution of this listener.
+
+`addListener` returns a unique identifier (string) that we can use to [remove the listener](#removeListener).
+
+#### Why have a delay?
+One of the common uses for ready.js is to know when your application has initialized and is ready to start working. So imagine you have a page load, where you need to watch the `DOM Ready` event, when data from the server has been loaded, auth operations finished etc etc. When everything is done you want to do a series of operations like lazy load more libraries or whatnot. This is where *delay* comes in handy and gives you the power to control execution flow.
+
+```javascript
+var r = ss.ready('appReady');
+r.addCheck('DOM');
+r.addCheck('auth');
+r.addCheck('serverDataObjects');
+
+/* ... */
+
+// When our app is ready execute allDone to cleanup and update UI
+ss.ready('appReady').addListener(allDone);
+
+/* ... */
+
+// lazy load widgets when our app is ready
+var r = ss.ready('appReady');
+
+// lazy load twitter widget 300ms after app is ready
+r.addListener(lazyLoadTwitter, 300);
+
+// lazy load calendar widget 2seconds after app is ready
+r.addListener(lazyLoadCalendar, 2000);
+```
+
+### .addCheckListener(checkId, fn, opt_delay)
+
+Adds a listener for the completion of the specified *check*.
+
+`addCheckListener` behaves exactly like `[addListener](#.addListener)`, returns a unique string identifier which can be used to [remove the check listener](#.removeCheckListener)
+
+### .removeListener(uid), .removeCheckListener(uid)
+
+Removes a listener from the *ready watch* or the specific *check*.
+
+`removeListener` and `removeCheckListener` return the current instance, so they are chainable.
+
+```javascript
+// create and construct our ready watch
+var r = ss.ready('loadComplete')
+    .addCheck('googleLoaded')
+    .addCheck('twitterLoaded')
+    .addCheck('facebookLoaded');
+
+// add a ready listener and a check listener
+var readyUid = r.addListener(onLoadComplete);
+var checkUid = r.addCheckListener('twitterLoaded', onTwitterLoad);
+
+/* ... */
+
+// we want to remove the two listeners we added as they no longer are needed
+var r = ss.ready('loadComplete');
+// remove the main watch listener
+r.removeListener(readyUid)
+    // and remove the check listener
+    .removeCheckListener(checkUid);
+```
+
+### .isDone(), .isCheckDone(checkId)
+
+`isDone` returns `boolean` if the *ready watch* has finished.
+
+`isCheckDone` returns `boolean` if the specified *check* has finished.
 
 
+### .dispose()
+
+Will dispose all references to *checks*, *listeners*, everything, from the current instance.
+
+### STATIC: ss.ready.reset()
+
+*Hard core delete action!*
+Will run `.dispose()` on all existing instances and remove any references to the instances.
+
+
+## Examples
+
+### Example 1: Our web application initializes...
+```javascript
+
+function appReady() {
+    /* do stuff */
+}
+
+// we'll use the main event for our "app ready" watch
+ss.ready(appReady);
+
+// lazy load a few libs when app is ready
+ss.ready(lazyLoadTwitter, 300);
+ss.ready(lazyLoadCalWidget, 500);
+
+// now add the checks that we want to watch
+var r = ss.ready(); // ready with no params, returns the default 'main' watch
+
+r.addCheck('DOM')
+    .addCheck('facebookAuth')
+    .addCheck('uiReady');
+
+// attach to document ready event using jQuery and inline execute DOM check
+$(document).ready(ss.ready().DOM);
+
+/* ... */
+
+// Listen for Facebook initial login status
+FB.getLoginStatus(function(response){
+    /* do your stuff */
+
+    // Check facebook watch
+    ss.ready().facebookAuth();
+});
+
+/* ... */
+
+// when our UI is ready and responsive trigger the ui check
+ss.ready().check('uiReady');
+
+/* ... */
+
+```
+
+### Example 2: Listeners can be added after watch has finished
+```javascript
+var r = ss.ready('allDone');
+r.addCheck('doneOne');
+r.addCheck('doneTwo');
+
+/* ... */
+
+r.check('doneOne');
+r.check('doneTwo');
+
+/* ... */
+
+r.addListener(function(){
+    /* will execute synchronously as the ready watch has finished */
+});
+```
+
+### Example 3: Ready watch inside a repeative callback
+```javascript
+
+// listen for click on User Search
+$('#button-search-users').on('click', function(e){
+
+    /* ... cook criteria, etc ... */
+
+    // disable our button
+    $(this).attr('disabled', 'disabled');
+
+    loadUsers(criteria, usersLoaded);
+});
+
+/**
+ * When users finish loading and UI is populated
+ * call this function
+ * @return {void}
+ */
+function usersLoadFinished() {
+    $('#button-search-users').removeAttr('disabled');
+}
+
+/**
+ * Callback function for 'loadUsers' function
+ *
+ * @param  {Array.<Object>} allUsers An array containing user data objects
+ * @return {void}
+ */
+function usersLoaded(allUsers) {
+    // prepare our ready watch, force init as this is a repeative
+    // call and we don't want to load previous state
+    var r = ss.ready('usersLoaded', true);
+
+    // add checks for all our operations
+    r.addCheck('allParsed')
+    r.addCheck('uiReady');
+
+    // when all done execute usersLoadFinished
+    r.addListener(usersLoadFinished);
+
+    // go through all users
+    var user, userBlock;
+    for (var i = 0, l = allUsers.length ; i < l ; i++) {
+        // get the single user data object
+        user = allUsers[i];
+        // get the user markup block, it's an awesome class
+        userBlock = new UserBlock(user);
+
+        // userBlock needs to load the user's image
+        // and appear with a small animation fx on the DOM
+        // dynamically create ready checks for these events
+        r.addCheck('user-image-loaded' + user.id);
+        r.addCheck('user-animation-finished' + user.id);
+
+        // now attach the the userBlock's exposed events
+        userBlock.listen('imageLoad', r['user-image-loaded' + user.id]);
+        userBlock.listen('fxFinished', r['user-animation-finished' + user.id]);
+
+        // remember, checks are also assigned as methods on our ready instance.
+        //
+        // Our unique to this user, checkId ('user-image-loaded' + user.id) let's suppose
+        // it evaluates to 'user-image-loaded-444'. So this string literal has also been
+        // assigned as a method to the ready instance 'r'.
+        //
+        // This means we can access it at r['user-image-loaded-444'] and execute
+        // it using r['user-image-loaded-444']();
+
+        // append our userBlock to the DOM
+        $('#users-search-list').append(userBlock.render());
+    }
+
+    // loop finished
+    r.check('allParsed');
+
+    // now show the complete list with an animation fx and we are done
+    $('#users-search-list').fadeIn('slow', r.uiReady);
+}
+
+
+
+```
 
 
 ## License

@@ -51,6 +51,8 @@ test('Core functionality', function() {
   function hookTwo()
   {
     ok(true, 'Listener Two executed');
+
+    start();
   }
 
   function hookThree()
@@ -68,6 +70,7 @@ test('Core functionality', function() {
   }
 
   ss.ready(hookOne);
+  ss.ready(hookTwo, 50);
 
   var main = ss.ready('main');
 
@@ -75,9 +78,8 @@ test('Core functionality', function() {
   main.addCheck('task1');
   main.addCheck('task2');
 
-  // add our listeners
-  main.addListener(hookTwo);
-  main.addListener(hookThree);
+  // add our listeners - test no params call
+  ss.ready().addListener(hookThree);
 
   ok(!main.isDone(), 'Ready watch is not done yet');
 
@@ -97,7 +99,6 @@ test('Core functionality', function() {
   // a done ready watch should execute synchronously the listener
   niam.addListener(hookFive);
 
-  start();
 });
 
 
@@ -334,12 +335,48 @@ test('Early listeners, shortcuts and heavy chaining', function(){
 
   var checkTwo = 'check Two';
 
-  r.ac('check One')
-    .acl(hookTwo) // chain addCheckListener
-    .ac(checkTwo) // chain addCheck
+  r.ac('check One') // add check
+    .acl(hookTwo); // chain addCheckListener
+
+  r.ac(checkTwo) // addCheck
     [checkTwo]() // chain check execution (check done)
     .al(hookThree); // chain addListener
 
   r.c('check One');
 });
 
+test('Dispose method', function(){
+ expect( 1 );
+
+  function hookOne()
+  {
+    ok(false, 'Listener One should not be executed');
+  }
+  function hookTwo()
+  {
+    ok(true, 'Check Listener Two executed');
+  }
+  function hookThree()
+  {
+    ok(false, 'Listener Three should not be executed');
+  }
+
+  var r = ss.ready('a silly name');
+  r.al(hookOne);
+
+  var checkTwo = 'check Two';
+
+  r.ac('check One')
+    .acl(hookTwo); // chain addCheckListener
+
+  r.ac(checkTwo) // addCheck
+    [checkTwo]() // chain check execution (check done)
+    .al(hookThree); // chain addListener
+
+  // dispose
+  ss.ready('a silly name').dispose();
+
+  // try to run the last check...
+  r.c('check One');
+
+});
