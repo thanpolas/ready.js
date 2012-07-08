@@ -114,21 +114,21 @@ In the browser, you can find ready.js in the `ss.ready` namespace, or as mention
 
 `ss.ready` creates a new *ready* instance or returns an existing one if previously initialized.
 
-If the first parameter is a *function* then `ss.ready` poses as `[.addListener](#.addListener_fn_opt_delay)` and attaches to the **'main'** watch. The *main watch* is hardcoded into the library and uses the name `main`.
+If the first parameter is a *function* then `ss.ready` poses as [`.addListener`](#addlistenerfn-opt_delay) and attaches to the **'main'** watch. The *main watch* is hardcoded into the library and uses the name `main`.
 
-You can access the default *'main'* ready watch with `ss.ready('main')` or plainly `ss.ready()`
+You can access the default *'main'* watch with `ss.ready('main')` or plainly `ss.ready()`
 
-The `opt_forceInit` option is a boolean which if set to true, will force re-initialization of the *watch*. A nice example of how to use it can be found in the ##################.
+The `opt_forceInit` option is a boolean which if set to true, will force re-initialization of the *watch*. A nice example of how to use it can be found in [Example 3](#example-3-ready-watch-inside-a-repeative-callback).
 
 ### .addCheck(checkId)
 
 `.addCheck(checkId)` adds a *check* to the *ready watch*. Make sure `checkId` is a string or has a `.toString()` method.
 
-Each *check* that is added has to be *checked* (aka finished) with the [check](#check) call.
+Each *check* that is added, has to be *checked* (aka finished) with the [`.check(checkId)`](#checkcheckid) call.
 
 `addCheck` returns the self instance so you can chain it.
 
-Every *check* you add creates a method in the instance using the `checkId` parameter, which equates to `.check(checkId)`. See the example...
+Every *check* you add creates a new method in the instance using the `checkId` parameter as name. This new method is the same as calling `.check(checkId)`. See the example...
 
 ```javascript
 var r = ss.ready('authDone');
@@ -143,7 +143,7 @@ r.addCheck('twitterDone')
 // facebook finished
 r.check('facebookDone');
 
-// twitter finished, use the method to declare it's done
+// twitter finished, use the newly created method to declare it's done
 r.twitterDone();
 // do the same with local auth
 r.localDone();
@@ -156,16 +156,18 @@ r.localDone();
 
 `check` returns the self instance so you can chain it.
 
-`check` can trigger listener execution if it's the last one of the *checks* to finish or if we have attached a [checkListener](#checklistener) for this check.
+`check` can trigger execution of listeners if it's the last one of the *checks* to finish or if we have attached a [checkListener](#addchecklistenercheckid-fn-opt_delay) for this check.
 
 ### .addListener(fn, opt_delay)
 
-Adds a listener for the completion of the current *ready watch*. `fn` has to be a function and `opt_delay` is an optional number which indicates delay in execution of this listener.
+Adds a listener for the completion of the current *ready watch*. `fn` has to be a function and `opt_delay` is an optional number which indicates delay of execution in miliseconds.
 
-`addListener` returns a unique identifier (string) that we can use to [remove the listener](#removeListener).
+`addListener` returns a unique identifier (string) that we can use to [remove the listener](#removelisteneruid-removechecklisteneruid).
 
 #### Why have a delay?
-One of the common uses for ready.js is to know when your application has initialized and is ready to start working. So imagine you have a page load, where you need to watch the `DOM Ready` event, when data from the server has been loaded, auth operations finished etc etc. When everything is done you want to do a series of operations like lazy load more libraries or whatnot. This is where *delay* comes in handy and gives you the power to control execution flow.
+One of the common uses for ready.js is to watch when your application has initialized and is ready. So imagine you have a page load and you have to watch for multiple events... The DOM Ready event, when [server data loaded](https://github.com/thanpolas/server2js), when auth operations finished etc etc.
+
+When everything is done you want to do a series of operations like lazy load more libraries or whatnot. This is where *delay* comes into play and gives you the power to control execution flow.
 
 ```javascript
 var r = ss.ready('appReady');
@@ -194,7 +196,7 @@ r.addListener(lazyLoadCalendar, 2000);
 
 Adds a listener for the completion of the specified *check*.
 
-`addCheckListener` behaves exactly like `[addListener](#.addListener)`, returns a unique string identifier which can be used to [remove the check listener](#.removeCheckListener)
+`addCheckListener` behaves like [`addListener`](#addlistenerfn-opt_delay), returns a unique string identifier which can be used to [remove the check listener](#removelisteneruid-removechecklisteneruid)
 
 ### .removeListener(uid), .removeCheckListener(uid)
 
@@ -236,7 +238,8 @@ Will dispose all references to *checks*, *listeners*, everything, from the curre
 
 ### STATIC: ss.ready.reset()
 
-*Hard core delete action!*
+**Hard core delete action!**
+
 Will run `.dispose()` on all existing instances and remove any references to the instances.
 
 
