@@ -1,0 +1,42 @@
+{
+  "name": "asyncready.js",
+  "description": "Watch multiple async operations and control the flow",
+  "version": "0.6.2",
+  "homepage": "https://github.com/thanpolas/ready.js",
+  "author": {
+    "name": "Thanasis Polychronakis",
+    "email": "thanpolas@gmail.com",
+    "url": "http://twitter.com/thanpolas"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/thanpolas/ready.js.git"
+  },
+  "bugs": {
+    "url": "https://github.com/thanpolas/ready.js/issues"
+  },
+  "licenses": [
+    {
+      "type": "APACHE2",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0"
+    }
+  ],
+  "main": "dist/ready.node.js",
+  "engines": {
+    "node": "~0.6.19"
+  },
+  "scripts": {
+    "test": "grunt test"
+  },
+  "dependencies": {
+    "qunit2node": "~0.3.1"
+    },
+  "devDependencies": {
+    "grunt": "~0.3.10"
+  },
+  "keywords": [
+    "async",
+    "flow",
+    "control"
+  ]
+}

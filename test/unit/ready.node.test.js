@@ -352,8 +352,10 @@ adaptor.Module.prototype.doExport = function()
 };
 
 
+
+var NODE = NODE || false;
 // check for node.js
-if (NODE) {
+if ((NODE)) {
   var ss = {
     ready: require('../../dist/ready.node.js')
   };
@@ -610,8 +612,8 @@ test('Multiple Ready Watches', function() {
 
 });
 
-test('Late hooks on ready watches', function(){
-  expect( 2 );
+test('Lazy hooks and force init', function(){
+  expect( 3 );
   function readyOne() {
     ok(true, 'Lazy ready watch should be executed');
   }
@@ -629,6 +631,16 @@ test('Late hooks on ready watches', function(){
   // now add listeners after the watch is done
   r.addListener(readyOne);
   r.addCheckListener('a-check', checkOne);
+
+  // now force init of our ready watch
+  var newR = ss.ready('a-watch', true);
+  newR.addListener(readyOne);
+  // again, force init to overwrite previous addListener call
+  var moreR = ss.ready('a-watch', true);
+  moreR.addListener(readyOne);
+  moreR.addCheck('one');
+  moreR.one();
+  // our basic assertion here is that we expect 3  asserts
 });
 
 

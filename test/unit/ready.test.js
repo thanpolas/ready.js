@@ -1,6 +1,8 @@
 
+
+var NODE = NODE || false;
 // check for node.js
-if (NODE) {
+if ((NODE)) {
   var ss = {
     ready: require('../../dist/ready.node.js')
   };
@@ -257,8 +259,8 @@ test('Multiple Ready Watches', function() {
 
 });
 
-test('Late hooks on ready watches', function(){
-  expect( 2 );
+test('Lazy hooks and force init', function(){
+  expect( 3 );
   function readyOne() {
     ok(true, 'Lazy ready watch should be executed');
   }
@@ -276,10 +278,20 @@ test('Late hooks on ready watches', function(){
   // now add listeners after the watch is done
   r.addListener(readyOne);
   r.addCheckListener('a-check', checkOne);
+
+  // now force init of our ready watch
+  var newR = ss.ready('a-watch', true);
+  newR.addListener(readyOne);
+  // again, force init to overwrite previous addListener call
+  var moreR = ss.ready('a-watch', true);
+  moreR.addListener(readyOne);
+  moreR.addCheck('one');
+  moreR.one();
+  // our basic assertion here is that we expect 3  asserts
 });
 
 
-test('Checks as function', function(){
+test('Checks as function and chaining', function(){
   expect( 2 );
   function readyOne() {
     ok(true, 'Watch should be executed');
@@ -291,8 +303,8 @@ test('Checks as function', function(){
 
   var r = ss.ready('aWatch');
   var oddName = 'dashes-not-allowed-as-func-names';
-  r.addCheck('aCheck');
-  r.addCheck(oddName);
+  r.addCheck('aCheck').addCheck(oddName);
+
   r.addListener(readyOne);
   r.addCheckListener('aCheck', checkOne);
 
@@ -300,5 +312,34 @@ test('Checks as function', function(){
   r.aCheck();
   // execution from builder
   ss.ready('aWatch')[oddName]();
+});
+
+test('Early listeners, shortcuts and heavy chaining', function(){
+  expect( 3 );
+
+  function hookOne()
+  {
+    ok(true, 'Listener One executed');
+  }
+  function hookTwo()
+  {
+    ok(true, 'Check Listener Two executed');
+  }
+  function hookThree()
+  {
+    ok(true, 'Listener Three executed');
+  }
+
+  var r = ss.ready('a silly name').al(hookOne);
+
+  var checkTwo = 'check Two';
+
+  r.ac('check One')
+    .acl(hookTwo) // chain addCheckListener
+    .ac(checkTwo) // chain addCheck
+    [checkTwo]() // chain check execution (check done)
+    .al(hookThree); // chain addListener
+
+  r.c('check One');
 });
 

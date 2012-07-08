@@ -18,13 +18,6 @@ module.exports = function(grunt)
     },
 
     closureBuilder: {
-      buildNode: {
-        closureLibraryPath: 'closure-library',
-        inputs: ['lib/ready.export.js'],
-        output_file: 'dist/ready.node.js',
-        root: ['lib/', 'closure-library/'],
-        output_mode: 'script'
-      },
       compile: {
         closureLibraryPath: 'closure-library',
         inputs: ['lib/ready.export.js'],
@@ -41,31 +34,6 @@ module.exports = function(grunt)
           summary_detail_level: 3,
           output_wrapper: '(function(){%output%}).call(this);'
         }
-      },
-      compileNode: {
-        closureLibraryPath: 'closure-library',
-        inputs: ['lib/ready.export.js'],
-        namespaces: ['ss.ready', 'ss.ready.compiled'],
-        root: ['lib/', 'closure-library'],
-        compile: true,
-        compiler: '../../closure-compiler/superstartup-compiler/build/sscompiler.jar',
-        output_file: 'dist/ready.node.min.js',
-        compiler_options: {
-          compilation_level: 'ADVANCED_OPTIMIZATIONS',
-          define: ["'goog.DEBUG=false'", "'ss.STANDALONE=true'", "'NODEJS=true'"],
-          warning_level: 'verbose',
-          externs: 'build/node.extern.js',
-          summary_detail_level: 3,
-          formatting: 'PRETTY_PRINT'
-        }
-      }
-    },
-    closureDepsWriter: {
-       // any name that describes your operation
-       targetName: {
-        closureLibraryPath: 'closure-library', // path to closure library
-        files: ['lib/ready.js', 'lib/ready.export.js'],
-        output_file: 'lib/deps.js'
       }
     },
     qunit: {
@@ -77,12 +45,9 @@ module.exports = function(grunt)
  });
 
   // Default task.
-  grunt.registerTask('default', 'closureBuilder:compile');
-
-  // node concat ops
-  grunt.registerTask('nodecat', 'concat:node concat:nodeTests');
+  grunt.registerTask('default', 'closureBuilder:compile concat test');
 
   // node concat and test ops
-  grunt.registerTask('nodetest', 'nodecat test');
+  grunt.registerTask('nodetest', 'concat test');
 
 };
