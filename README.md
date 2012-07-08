@@ -2,7 +2,7 @@
 
 Watches over multiple async operations and triggers listeners when all or some are complete.
 
-At only 866bytes (gzip) ready.js is a powerfull and tiny library that alllows you to manage and monitor multiple asynchronous operations, giving you total control of your application's execution flow.
+At only 866 bytes (gzip) ready.js is a powerful and tiny library that alllows you to manage and monitor multiple asynchronous operations, giving you total control of your application's execution flow.
 
 ready.js runs both on the browser and node.js
 
@@ -18,7 +18,7 @@ ready.js runs both on the browser and node.js
 
 ```javascript
 
-var ss = { ready: require('asyncready.js') };
+var ready = require('asyncready.js');
 
 // lib loaded in the ss.ready namespace, we are ready to go
 ```
