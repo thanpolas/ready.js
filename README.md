@@ -2,7 +2,7 @@
 
 Watches over multiple async operations and triggers listeners when all or some are complete.
 
-At only 866 bytes (gzip) ready.js is a powerful and tiny library that alllows you to manage and monitor multiple asynchronous operations, giving you total control of your application's execution flow.
+At only 825 bytes (gzip) ready.js is a powerful and tiny library that alllows you to manage and monitor multiple asynchronous operations, giving you total control of your application's execution flow.
 
 ready.js runs both on the browser and node.js
 
@@ -110,11 +110,11 @@ And that was it. Once all 4 *checks* are done the *ready watch* will execute all
 
 In the browser, you can find ready.js in the `ss.ready` namespace, or as mentioned above, if you run on node.js do a `require('asyncready.js');` to get the library.
 
-### ss.ready(name | function, opt_forceInit | opt_delay)
+### ss.ready(name | function, opt_forceInit)
 
 `ss.ready` creates a new *ready* instance or returns an existing one if previously initialized.
 
-If the first parameter is a *function* then `ss.ready` poses as [`.addListener`](#addlistenerfn-opt_delay) and attaches to the **'main'** watch. The *main watch* is hardcoded into the library and uses the name `main`.
+If the first parameter is a *function* then `ss.ready` poses as [`.addListener`](#addlistenerfn) and attaches to the **'main'** watch. The *main watch* is hardcoded into the library and uses the name `main`.
 
 You can access the default *'main'* watch with `ss.ready('main')` or plainly `ss.ready()`
 
@@ -156,18 +156,13 @@ r.localDone();
 
 `check` returns the self instance so you can chain it.
 
-`check` can trigger execution of listeners if it's the last one of the *checks* to finish or if we have attached a [checkListener](#addchecklistenercheckid-fn-opt_delay) for this check.
+`check` can trigger execution of listeners if it's the last one of the *checks* to finish or if we have attached a [checkListener](#addchecklistenercheckid-fn) for this check.
 
-### .addListener(fn, opt_delay)
+### .addListener(fn)
 
-Adds a listener for the completion of the current *ready watch*. `fn` has to be a function and `opt_delay` is an optional number which indicates delay of execution in miliseconds.
+Adds a listener for the completion of the current *ready watch*. `fn` has to be a function.
 
 `addListener` returns a unique identifier (string) that we can use to [remove the listener](#removelisteneruid-removechecklisteneruid).
-
-#### Why have a delay?
-One of the common uses for ready.js is to watch when your application has initialized and is ready. So imagine you have a page load and you have to watch for multiple events... The DOM Ready event, when [server data loaded](https://github.com/thanpolas/server2js), when auth operations finished etc etc.
-
-When everything is done you want to do a series of operations like lazy load more libraries or whatnot. This is where *delay* comes into play and gives you the power to control execution flow.
 
 ```javascript
 var r = ss.ready('appReady');
@@ -182,21 +177,21 @@ ss.ready('appReady').addListener(allDone);
 
 /* ... */
 
-// lazy load widgets when our app is ready
+// load widgets when our app is ready
 var r = ss.ready('appReady');
 
-// lazy load twitter widget 300ms after app is ready
-r.addListener(lazyLoadTwitter, 300);
+// load twitter widget after app is ready
+r.addListener(lazyLoadTwitter);
 
-// lazy load calendar widget 2seconds after app is ready
-r.addListener(lazyLoadCalendar, 2000);
+// load calendar widget after app is ready
+r.addListener(lazyLoadCalendar);
 ```
 
-### .addCheckListener(checkId, fn, opt_delay)
+### .addCheckListener(checkId, fn)
 
 Adds a listener for the completion of the specified *check*.
 
-`addCheckListener` behaves like [`addListener`](#addlistenerfn-opt_delay), returns a unique string identifier which can be used to [remove the check listener](#removelisteneruid-removechecklisteneruid)
+`addCheckListener` behaves like [`addListener`](#addlistenerfn), returns a unique string identifier which can be used to [remove the check listener](#removelisteneruid-removechecklisteneruid)
 
 ### .removeListener(uid), .removeCheckListener(uid)
 
@@ -255,9 +250,9 @@ function appReady() {
 // we'll use the main event to attach the appReady callback
 ss.ready(appReady);
 
-// lazy load a few libs when app is ready
-ss.ready(lazyLoadTwitter, 300);
-ss.ready(lazyLoadCalWidget, 500);
+// load a few libs when app is ready
+ss.ready(lazyLoadTwitter);
+ss.ready(lazyLoadCalWidget);
 
 // now add the checks that we want to watch
 var r = ss.ready(); // ready with no params, returns the default 'main' watch
@@ -385,10 +380,7 @@ function usersLoaded(allUsers) {
     $('#users-search-list').fadeIn('slow', r.uiReady);
 }
 
-
-
 ```
-
 
 ## License
 Copyright (c) 2012 Thanasis Polychronakis

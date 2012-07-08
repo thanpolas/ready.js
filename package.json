@@ -1,7 +1,7 @@
 {
   "name": "asyncready.js",
   "description": "Watch multiple async operations and control the flow",
-  "version": "0.6.3",
+  "version": "0.6.4",
   "homepage": "https://github.com/thanpolas/ready.js",
   "author": {
     "name": "Thanasis Polychronakis",

@@ -404,8 +404,6 @@ test('Core functionality', function() {
   function hookTwo()
   {
     ok(true, 'Listener Two executed');
-
-    start();
   }
 
   function hookThree()
@@ -423,7 +421,7 @@ test('Core functionality', function() {
   }
 
   ss.ready(hookOne);
-  ss.ready(hookTwo, 50);
+  ss.ready(hookTwo);
 
   var main = ss.ready('main');
 
@@ -451,6 +449,8 @@ test('Core functionality', function() {
 
   // a done ready watch should execute synchronously the listener
   niam.addListener(hookFive);
+
+  start();
 
 });
 
@@ -482,11 +482,11 @@ test('Sequence of execution', function() {
   // add listeners
   r.addListener(addHook(7, 'First main hook executed'));
   r.addListener(addHook(8, 'Second main hook executed'));
-  r.addListener(addHook(9, 'Lazy hook executed'), 100);
-  r.addListener(addHook(10, 'Very lazy hook executed', true), 150);
+  r.addListener(addHook(9, 'Lazy hook executed'));
+  r.addListener(addHook(10, 'Very lazy hook executed', true));
   r.addCheckListener('task1', addHook(1, 'Task1 check hook executed'));
   r.addCheckListener('task2', addHook(3, 'Task2 check hook executed'));
-  r.addCheckListener('task2', addHook(5, 'Task2 check lazy hook executed'), 50);
+  r.addCheckListener('task2', addHook(4, 'Task2 check lazy hook executed'));
   r.addCheckListener('task3', addHook(6, 'Task3 check hook executed'));
 
   ok(!r.isDoneCheck('task1'), 'task1 is not done yet');
@@ -500,7 +500,7 @@ test('Sequence of execution', function() {
 
   r.check('task2');
 
-  equal(seq, 4, 'After task2 is done');
+  equal(seq, 5, 'After task2 is done');
   seq++;
 
   // execute after 100ms
@@ -547,12 +547,12 @@ test('Canceling listeners', function() {
   // add listeners
   r.addListener(addHook(1, 'First main hook executed'));
   r.addListener(addHook(2, 'Second main hook executed'));
-  r.addListener(addHook(3, 'Lazy hook executed'), 30);
-  r.addListener(addHook(4, 'Very lazy hook executed', true), 60);
+  r.addListener(addHook(3, 'Lazy hook executed'));
+  r.addListener(addHook(4, 'Very lazy hook executed', true));
   var removeOne = r.addListener(addFalseHook('First removed hook'));
-  var removeTwo = r.addListener(addFalseHook('Second removed hook'), 10);
+  var removeTwo = r.addListener(addFalseHook('Second removed hook'));
   var removeThree = r.addCheckListener('task1', addFalseHook('Third removed check hook'));
-  var removeFour = r.addCheckListener('task1', addFalseHook('Fourth removed check hook'), 20);
+  var removeFour = r.addCheckListener('task1', addFalseHook('Fourth removed check hook'));
 
   r.check('task2');
   ss.ready('a-ready-watch-rumble').check('task3');
