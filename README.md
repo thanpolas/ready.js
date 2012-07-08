@@ -10,9 +10,9 @@ ready.js runs both on the browser and node.js
 
 ### Browser version
 
-[Get the latest browser version (0.6.0)](https://github.com/thanpolas/ready.js/raw/master/dist/ready.min.js).
+[Get the latest browser version (0.6.4)](https://github.com/thanpolas/ready.js/raw/master/dist/ready.min.js).
 
-### node.js
+### node.js version
 
 `npm install asyncready.js` (ready.js was taken).
 
@@ -20,15 +20,18 @@ ready.js runs both on the browser and node.js
 
 var ready = require('asyncready.js');
 
-// lib loaded in the ss.ready namespace, we are ready to go
 ```
 
 [Check out the source](https://github.com/thanpolas/ready.js/blob/master/lib/ready.js) and the same source [adapted to run on node.js](https://github.com/thanpolas/ready.js/blob/master/dist/ready.node.js).
 
 
-## The Story
+## The Concept
 
-ready.js has **watches** which have **checks**. All *Checks* have to be *checked* in order to complete a *watch*. We can attach listeners on the completion of a single *check* or the completion of the *ready watch*, when all *cheks* are done.
+ready.js has ** ready watches**. Each *watch* can have one or multiple **checks**.
+
+All *Checks* have to finish in order to complete a *watch*.
+
+We can attach listeners on the completion of a single *check* or the completion of the whole *ready watch*, when all *cheks* are done.
 
 Assume we have 4 asynchronous operations that need to run, and we want to execute xyz methods when all 4 complete.
 
