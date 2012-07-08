@@ -53,7 +53,7 @@ r.addCheck('db_read_one')
     .addCheck('file_op_one');
 ```
 
-So, at this point we have set our *ready watch* ('jobDone') and added 4 *checks* ('db_write_one', 'db_write_two', 'db_read_one' and 'file_op_one'). Let's add some listeners on the *watch* that will trigger when everything has finished.
+So, at this point we have created our *ready watch* ('jobDone') and added 4 *checks* ('db_write_one', 'db_write_two', 'db_read_one' and 'file_op_one'). Let's add some listeners on the *watch* that will trigger when everything has finished.
 
 ```javascript
 // As per our scenario we want to execute xyz methods when
@@ -61,13 +61,14 @@ So, at this point we have set our *ready watch* ('jobDone') and added 4 *checks*
 // and z() which are in our context:
 var r = ss.ready('jobDone');
 r.addListener(x);
-// we can chain addListener too, so this is ok:
-ss.ready('jobDone')
-   .addListener(y)
-   .addListener(z);
+// addListener methods cannot be chained as they return a string
+// we'll talk later about that... However we can chain this way to
+// avoid a variable declaration:
+ss.ready('jobDone').addListener(y);
+ss.ready('jobDone').addListener(z);
 ```
 
-Awesome, we now have a *ready watch* witch *checks* and listeners attached. Now, somewhere deep in our code, we do the async operations. When they are finished we want to inform our *ready watch* about it so it can check if everything else is also finished and trigger our listeners. Here is how we do it:
+Awesome, we now have a *ready watch* with *checks* and listeners attached. Now, somewhere deep in our code, we do the async operations. When they are finished we want to inform our *ready watch* about it so it can check if everything is finished and trigger our listeners. Here is how we do it:
 
 ```javascript
 // let's check db write one first...
@@ -82,7 +83,7 @@ client.set('one', 'this is db write one', function(err, reply){
 
 // A cool feature with checks is that every added check on our
 // ready watch creates a method with the name we used.
-// So for cases where we don't care about the callback we can
+// So for cases where we don't care about the callback's parameters we can
 // inline the check call like this:
 client.set('two', 'this is db write two', ss.ready('jobDone').db_write_two);
 
@@ -90,9 +91,8 @@ client.set('two', 'this is db write two', ss.ready('jobDone').db_write_two);
 
 // two remaining checks todo, remember to call the checks in any outcome
 // of your async operations, success or failure!
-
 client.get('this_key_doesnt_exist', function(err, reply){
-    /* handle your error but ALWAYS check your watch!
+    /* handle your error but ALWAYS check your watch! */
     ss.ready('jobDone').check('db_read_on');
 });
 
