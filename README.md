@@ -27,11 +27,11 @@ var ready = require('asyncready.js');
 
 ## The Concept
 
-* ready.js has **ready watches**. Each *watch* can have one or multiple **checks**.
+* Each ready.js instance is a **ready watch**. Each *watch* can have one or multiple **checks**.
 * All *Checks* have to finish in order to complete a *watch*.
 * Listeners can be attached  on the completion of a single *check* or the completion of the whole *ready watch*, when all *cheks* are done.
 
-Assume we have 4 asynchronous operations that need to run, and we want to execute xyz methods when all 4 complete.
+Assume we have 4 asynchronous operations that need to run, and we want to execute xyz methods when all 4 are complete.
 
 We will create a *ready watch*, let's name it `jobDone`.
 
@@ -39,7 +39,7 @@ We will create a *ready watch*, let's name it `jobDone`.
 var r = ss.ready('jobDone');
 ```
 
-As per our scenario, we want to watch the execution of 4 async operations. Say they are 2 db writes, 1 db read and 1 file operation. We'll have to create 4 *checks*.
+The async operations are 2 db writes, 1 db read and 1 file operation. We'll have to create 4 *checks*.
 
 ```javascript
 // our ready watch was stored in var r
@@ -54,7 +54,9 @@ r.addCheck('db_read_one')
     .addCheck('file_op_one');
 ```
 
-So, at this point we have created our *ready watch* ('jobDone') and added 4 *checks* ('db_write_one', 'db_write_two', 'db_read_one' and 'file_op_one'). Let's add some listeners on the *watch* that will trigger when everything has finished.
+So, at this point we have created the *ready watch* ('jobDone') and added 4 *checks* ('**db_write_one**', '**db_write_two**', '**db_read_one**' and '**file_op_one**').
+
+Let's add some listeners on the *watch*.
 
 ```javascript
 // As per our scenario we want to execute xyz methods when
@@ -69,7 +71,7 @@ ss.ready('jobDone').addListener(y);
 ss.ready('jobDone').addListener(z);
 ```
 
-Awesome, we now have a *ready watch* with *checks* and listeners attached. Now, somewhere deep in our code, we do the async operations. When they are finished we want to inform our *ready watch* about it so it can check if everything is finished and trigger our listeners. Here is how we do it:
+Awesome, we now have a *ready watch* with *checks* and listeners attached. Now, somewhere deep in our code, we do the async operations. When they are finished we want to inform our *ready watch* about it so it can check if everything is finished and trigger the listeners.
 
 ```javascript
 // let's check db write one first...
