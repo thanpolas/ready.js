@@ -202,11 +202,11 @@ test('Canceling listeners', function() {
   var removeFour = r.addCheckListener('task1', addFalseHook('Fourth removed check hook'), 20);
 
   r.check('task2');
-  r.check('task3');
+  ss.ready('a-ready-watch-rumble').check('task3');
   r.removeListener(removeOne);
-  r.removeListener(removeTwo);
+  ss.ready('a-ready-watch-rumble').removeListener(removeTwo);
   r.removeCheckListener(removeThree);
-  r.removeCheckListener(removeFour);
+  ss.ready('a-ready-watch-rumble').removeCheckListener(removeFour);
   r.check('task1');
 });
 
@@ -315,7 +315,7 @@ test('Checks as function and chaining', function(){
   ss.ready('aWatch')[oddName]();
 });
 
-test('Early listeners, shortcuts and heavy chaining', function(){
+test('Early listeners and heavy chaining', function(){
   expect( 3 );
 
   function hookOne()
@@ -331,22 +331,23 @@ test('Early listeners, shortcuts and heavy chaining', function(){
     ok(true, 'Listener Three executed');
   }
 
-  var r = ss.ready('a silly name').al(hookOne);
+  var r = ss.ready('a silly name');
+  r.addListener(hookOne);
 
   var checkTwo = 'check Two';
 
-  r.ac('check One') // add check
-    .acl(hookTwo); // chain addCheckListener
+  r.addCheck('check One') // add check
+    .addCheckListener(checkTwo, hookTwo); // chain addCheckListener
 
-  r.ac(checkTwo) // addCheck
-    [checkTwo]() // chain check execution (check done)
-    .al(hookThree); // chain addListener
+  r.addCheck(checkTwo); // addCheck
+  r[checkTwo](); // chain check execution (check done)
+  r.addListener(hookThree); // chain addListener
 
-  r.c('check One');
+  r.check('check One');
 });
 
-test('Dispose method', function(){
- expect( 1 );
+test('reset and Dispose method', function(){
+  expect( 1 );
 
   function hookOne()
   {
@@ -361,22 +362,24 @@ test('Dispose method', function(){
     ok(false, 'Listener Three should not be executed');
   }
 
+  ss.ready.reset();
+
   var r = ss.ready('a silly name');
-  r.al(hookOne);
+  r.addListener(hookOne);
 
   var checkTwo = 'check Two';
 
-  r.ac('check One')
-    .acl(hookTwo); // chain addCheckListener
+  r.addCheck('check One')
+    .addCheckListener(checkTwo, hookTwo); // chain addCheckListener
 
-  r.ac(checkTwo) // addCheck
-    [checkTwo]() // chain check execution (check done)
-    .al(hookThree); // chain addListener
+  r.addCheck(checkTwo); // addCheck
+  r[checkTwo](); // chain check execution (check done)
+  r.addListener(hookThree); // chain addListener
 
   // dispose
   ss.ready('a silly name').dispose();
 
   // try to run the last check...
-  r.c('check One');
+  r.check('check One');
 
 });

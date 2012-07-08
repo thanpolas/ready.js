@@ -2,7 +2,7 @@
 
 Watches over multiple async operations and triggers listeners when all or some are complete.
 
-At only 815bytes (gzip) ready.js is a powerfull and tiny library that alllows you to manage and monitor multiple asynchronous operations, giving you total control on the execution flow of your application.
+At only 866bytes (gzip) ready.js is a powerfull and tiny library that alllows you to manage and monitor multiple asynchronous operations, giving you total control on the execution flow of your application.
 
 ready.js runs both on the browser and node.js
 
@@ -252,7 +252,7 @@ function appReady() {
     /* do stuff */
 }
 
-// we'll use the main event for our "app ready" watch
+// we'll use the main event to attach the appReady callback
 ss.ready(appReady);
 
 // lazy load a few libs when app is ready

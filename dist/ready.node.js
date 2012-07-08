@@ -59,7 +59,8 @@ ss.STANDALONE = true;
  * @param {string|function()} nameId Unique identifier or function that will attach
  *      to our framework's main ready event...
  * @param {boolean=} opt_forceInit If we need to force Init.
- * @return {ss.ready.C} .
+ * @return {ss.ready.C|string} Instance of ss.ready.C or uid of listener
+ *              in case nameId is a function.
  */
  ss.ready = function(nameId, opt_forceInit)
  {
@@ -69,14 +70,18 @@ ss.STANDALONE = true;
     // for calls with a listener, assign the listener
     // to our main ready watch
     c = ss.ready.getInstance(ss.ready.MAIN);
-    c.addListener(nameId);
-    return c;
+    return c.addListener(/** @type {function()} */ (nameId), opt_forceInit);
   }
 
-  c = ss.ready.getInstance(nameId);
+  // check for no params and return main instance
+  if (0 === arguments.length) {
+    return ss.ready.getInstance(ss.ready.MAIN);
+  }
+
+  c = ss.ready.getInstance(/** @type {string} */ (nameId));
   if (opt_forceInit) {
       // we want to force initialize --> overwrite
-      c = new ss.ready.C(nameId);
+      c = new ss.ready.C( /** @type {string} */ (nameId));
       ss.ready.db.allReady[nameId] = c;
     }
   return c;
@@ -111,7 +116,7 @@ ss.ready.MAIN = 'main';
      */
     ss.ready.isFunction = function(obj)
     {
-      return '[object Function]' == Object.prototype.toString.call(obj);
+      return '[object Function]' === Object.prototype.toString.call(obj);
     };
 
     /**
@@ -241,8 +246,6 @@ ss.ready.MAIN = 'main';
 
 /**
  * Disposes all references to checks, listeners, all
- *
- *
  */
 ss.ready.C.prototype.dispose = function()
 {
@@ -266,8 +269,8 @@ ss.ready.C.prototype.dispose_ = function(obj, opt_func)
       if (obj[k].hasFunc) {
         this.delete_(this, obj[k].checkId);
       }
-      this.delete_(obj, k);
     }
+    this.delete_(obj, k);
   }
 };
 
@@ -324,11 +327,13 @@ ss.ready.C.prototype.addListener = function(fn, opt_delay)
 
 /**
  * Remove a listener function
- * @param {string} uid .
+ * @param {string} uid
+ * @return {!ss.ready.C}
  */
 ss.ready.C.prototype.removeListener = function(uid)
 {
   this.delete_(this.fn_, uid);
+  return this;
 };
 
 /**
@@ -377,7 +382,8 @@ ss.ready.C.prototype.removeListener = function(uid)
 
 /**
  * Remove a check listener function
- * @param {string} uid .
+ * @param {string} uid
+ * @return {!ss.ready.C}
  */
 ss.ready.C.prototype.removeCheckListener = function(uid)
 {
@@ -388,6 +394,7 @@ ss.ready.C.prototype.removeCheckListener = function(uid)
       break;
     }
   }
+  return this;
 };
 
 
@@ -396,11 +403,12 @@ ss.ready.C.prototype.removeCheckListener = function(uid)
  * before firing the ready listeners
  *
  * @param {string} checkId The check string id we will use as a switch.
+ * @return {!ss.ready.C}
  */
  ss.ready.C.prototype.addCheck = function(checkId)
  {
   // check if this checkId is already created
-  if (! this.checks_[checkId]) {
+  if ( !this.checks_[checkId]) {
       // yup, not found...
       this.checks_[checkId] = {
         checkId: checkId,
@@ -408,7 +416,7 @@ ss.ready.C.prototype.removeCheckListener = function(uid)
         hasFunc: false
       };
       // check if the namespace is available to create a func that will finish this check
-      if (! this[checkId]) {
+      if ( !this[checkId]) {
         // it's available
         this[checkId] = ss.ready.bind(function() {
           this.check(checkId);
@@ -416,6 +424,8 @@ ss.ready.C.prototype.removeCheckListener = function(uid)
         this.checks_[checkId].hasFunc = true;
       }
     }
+
+    return this;
 }; // method ss.ready.addCheck
 
 /**
@@ -423,9 +433,9 @@ ss.ready.C.prototype.removeCheckListener = function(uid)
  * then we execute the ready function
  *
  * @param {string} checkId The check string id we will use as a switch.
- * @param {boolean=} opt_state If check method failed, set this to false.
+ * @return {!ss.ready.C}
  */
- ss.ready.C.prototype.check = function(checkId, opt_state)
+ ss.ready.C.prototype.check = function(checkId)
  {
   // find the check string in our map of checks...
   var check = this.checks_[checkId];
@@ -438,7 +448,7 @@ ss.ready.C.prototype.removeCheckListener = function(uid)
           // run all listeners
           this._runAll();
         }
-        return;
+        return this;
       }
 
   // mark the check as done
@@ -456,6 +466,8 @@ ss.ready.C.prototype.removeCheckListener = function(uid)
     } else {
     // not done, nothing to do here, move on
   }
+
+  return this;
 }; // method ss.ready.check
 
 /**
@@ -581,6 +593,7 @@ if (COMPILED) {
   c['removeListener'] = c.removeListener;
   c['isDone'] = c.isDone;
   c['isDoneCheck'] = c.isDoneCheck;
+  c['dispose'] = c.dispose;
 
   r['C'].prototype = c;
 

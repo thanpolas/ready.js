@@ -1,7 +1,7 @@
 {
   "name": "asyncready.js",
   "description": "Watch multiple async operations and control the flow",
-  "version": "0.6.2",
+  "version": "0.6.3",
   "homepage": "https://github.com/thanpolas/ready.js",
   "author": {
     "name": "Thanasis Polychronakis",
@@ -29,7 +29,7 @@
     "test": "grunt test"
   },
   "dependencies": {
-    "qunit2node": "~0.3.1"
+    "qunit2node": "~0.3.2"
     },
   "devDependencies": {
     "grunt": "~0.3.10"

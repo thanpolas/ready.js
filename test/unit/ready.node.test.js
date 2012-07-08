@@ -404,6 +404,8 @@ test('Core functionality', function() {
   function hookTwo()
   {
     ok(true, 'Listener Two executed');
+
+    start();
   }
 
   function hookThree()
@@ -421,6 +423,7 @@ test('Core functionality', function() {
   }
 
   ss.ready(hookOne);
+  ss.ready(hookTwo, 50);
 
   var main = ss.ready('main');
 
@@ -428,9 +431,8 @@ test('Core functionality', function() {
   main.addCheck('task1');
   main.addCheck('task2');
 
-  // add our listeners
-  main.addListener(hookTwo);
-  main.addListener(hookThree);
+  // add our listeners - test no params call
+  ss.ready().addListener(hookThree);
 
   ok(!main.isDone(), 'Ready watch is not done yet');
 
@@ -450,7 +452,6 @@ test('Core functionality', function() {
   // a done ready watch should execute synchronously the listener
   niam.addListener(hookFive);
 
-  start();
 });
 
 
@@ -554,11 +555,11 @@ test('Canceling listeners', function() {
   var removeFour = r.addCheckListener('task1', addFalseHook('Fourth removed check hook'), 20);
 
   r.check('task2');
-  r.check('task3');
+  ss.ready('a-ready-watch-rumble').check('task3');
   r.removeListener(removeOne);
-  r.removeListener(removeTwo);
+  ss.ready('a-ready-watch-rumble').removeListener(removeTwo);
   r.removeCheckListener(removeThree);
-  r.removeCheckListener(removeFour);
+  ss.ready('a-ready-watch-rumble').removeCheckListener(removeFour);
   r.check('task1');
 });
 
@@ -644,7 +645,7 @@ test('Lazy hooks and force init', function(){
 });
 
 
-test('Checks as function', function(){
+test('Checks as function and chaining', function(){
   expect( 2 );
   function readyOne() {
     ok(true, 'Watch should be executed');
@@ -656,8 +657,8 @@ test('Checks as function', function(){
 
   var r = ss.ready('aWatch');
   var oddName = 'dashes-not-allowed-as-func-names';
-  r.addCheck('aCheck');
-  r.addCheck(oddName);
+  r.addCheck('aCheck').addCheck(oddName);
+
   r.addListener(readyOne);
   r.addCheckListener('aCheck', checkOne);
 
@@ -667,3 +668,71 @@ test('Checks as function', function(){
   ss.ready('aWatch')[oddName]();
 });
 
+test('Early listeners and heavy chaining', function(){
+  expect( 3 );
+
+  function hookOne()
+  {
+    ok(true, 'Listener One executed');
+  }
+  function hookTwo()
+  {
+    ok(true, 'Check Listener Two executed');
+  }
+  function hookThree()
+  {
+    ok(true, 'Listener Three executed');
+  }
+
+  var r = ss.ready('a silly name');
+  r.addListener(hookOne);
+
+  var checkTwo = 'check Two';
+
+  r.addCheck('check One') // add check
+    .addCheckListener(checkTwo, hookTwo); // chain addCheckListener
+
+  r.addCheck(checkTwo); // addCheck
+  r[checkTwo](); // chain check execution (check done)
+  r.addListener(hookThree); // chain addListener
+
+  r.check('check One');
+});
+
+test('reset and Dispose method', function(){
+  expect( 1 );
+
+  function hookOne()
+  {
+    ok(false, 'Listener One should not be executed');
+  }
+  function hookTwo()
+  {
+    ok(true, 'Check Listener Two executed');
+  }
+  function hookThree()
+  {
+    ok(false, 'Listener Three should not be executed');
+  }
+
+  ss.ready.reset();
+
+  var r = ss.ready('a silly name');
+  r.addListener(hookOne);
+
+  var checkTwo = 'check Two';
+
+  r.addCheck('check One')
+    .addCheckListener(checkTwo, hookTwo); // chain addCheckListener
+
+  r.addCheck(checkTwo); // addCheck
+  r[checkTwo](); // chain check execution (check done)
+  r.addListener(hookThree); // chain addListener
+
+  // dispose
+  ss.ready('a silly name').dispose();
+
+  // try to run the last check...
+  r.check('check One');
+
+});
