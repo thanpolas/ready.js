@@ -130,9 +130,20 @@ ss.ready.MAIN = 'main';
      */
     ss.ready.bind = function(fn, selfObj)
     {
-      return function() {
-        return fn.apply(selfObj);
-      };
+      if (arguments.length > 2) {
+        var boundArgs = Array.prototype.slice.call(arguments, 2);
+        return function() {
+          // Prepend the bound arguments to the current arguments.
+          var newArgs = Array.prototype.slice.call(arguments);
+          Array.prototype.unshift.apply(newArgs, boundArgs);
+          return fn.apply(selfObj, newArgs);
+        };
+
+      } else {
+        return function() {
+          return fn.apply(selfObj, arguments);
+        };
+      }
     };
   } else {
     ss.ready.isFunction = goog.isFunction;
@@ -185,19 +196,30 @@ ss.ready.MAIN = 'main';
 /**
  * Each check object has:
  *
- * @typedef {{checkId: string, done: boolean, hasFunc: boolean}}
+ * @typedef {{checkId: string,
+ *          done: boolean,
+ *          hasFunc: boolean,
+ *          args: Array
+ *          }}
  */
  ss.ready.checkObject;
 
 /**
  * Each listener function object has:
- * @typedef {{fn: function()}}
+ * @typedef {{
+ *          fn: function(ss.ready.C),
+ *          selfObj: Object
+ *          }}
  */
  ss.ready.listenerObject;
 
 /**
  * Each Check Listener function object has:
- * @typedef {{checkId: string, fn: function()}}
+ * @typedef {{
+ *          checkId: string,
+ *          fn: function([...*]),
+ *          selfObj: Object
+ *          }}
  */
  ss.ready.checkListenerObject;
 
@@ -301,20 +323,24 @@ ss.ready.C.prototype.isDoneCheck = function(checkId)
 /**
  * Pushes a listener function down the ready queue...
  *
- * @param {function()} fn callback function.
+ * @param {function(ss.ready.C)} fn callback function.
+ * @param {Object|undefined} opt_selfObj Specifies the object which |this| should
+ *     point to when the function is run.
  * @return {string?} unique id you can use to remove the listener.
  */
-ss.ready.C.prototype.addListener = function(fn)
+ss.ready.C.prototype.addListener = function(fn, opt_selfObj)
 {
+  var selfObj = opt_selfObj || this;
   // if watch is finished then we execute the function right away...
   if (this.isDone()) {
-    fn();
+    fn.call(selfObj, this);
     return null;
   }
 
   // push the function object after we create it
   var fnObj = {
-    fn: fn
+    fn: fn,
+    selfObj: selfObj
   };
 
   var uid = ss.ready.uid();
@@ -339,14 +365,17 @@ ss.ready.C.prototype.removeListener = function(uid)
  * ready watch
  *
  * @param {string} checkId The name of the check ID.
- * @param {function()} fn callback function.
+ * @param {function([...*])} fn callback function.
+ * @param {Object|undefined} opt_selfObj Specifies the object which |this| should
+ *     point to when the function is run.
  * @return {string?} unique id you can use to remove the check listener.
  */
- ss.ready.C.prototype.addCheckListener = function(checkId, fn)
+ ss.ready.C.prototype.addCheckListener = function(checkId, fn, opt_selfObj)
  {
+  var selfObj = opt_selfObj || this;
   // if check or watch is finished then we execute the function right away...
   if (this.done_ || this.isDoneCheck(checkId)) {
-    fn();
+    fn.apply(selfObj, this.getArgs(checkId));
     return null;
   }
 
@@ -360,7 +389,8 @@ ss.ready.C.prototype.removeListener = function(uid)
   // construct the object to store
   var obj = {
     checkId: checkId,
-    fn: fn
+    fn: fn,
+    selfObj: selfObj
   };
   var uid = ss.ready.uid();
 
@@ -409,13 +439,14 @@ ss.ready.C.prototype.removeCheckListener = function(uid)
       this.checks_[checkId] = {
         checkId: checkId,
         done: false,
-        hasFunc: false
+        hasFunc: false,
+        args: null
       };
       // check if the namespace is available to create a func that will finish this check
       if ( !this[checkId]) {
         // it's available
         this[checkId] = ss.ready.bind(function() {
-          this.check(checkId);
+          this.check.apply(this, Array.prototype.concat(checkId, Array.prototype.slice.call(arguments,0)));
         }, this);
         this.checks_[checkId].hasFunc = true;
       }
@@ -429,30 +460,33 @@ ss.ready.C.prototype.removeCheckListener = function(uid)
  * then we execute the ready function
  *
  * @param {string} checkId The check string id we will use as a switch.
+ * @param {...*}  var_args arguments that will be applied to the callback
  * @return {!ss.ready.C}
  */
- ss.ready.C.prototype.check = function(checkId)
+ ss.ready.C.prototype.check = function(checkId, var_args)
  {
   // find the check string in our map of checks...
   var check = this.checks_[checkId];
 
   if (!check) {
-      // not found in checks, check if we have no checks left
-      if (this.isChecksComplete_()) {
-          // all is done
-          this.done_ = true; // set Ready Watch's switch
-          // run all listeners
-          this._runAll();
-        }
-        return this;
-      }
+    // not found in checks, just return this object
+    return this;
+  }
+
+  // if check already done, return
+  if (check.done) {
+    return this;
+  }
 
   // mark the check as done
   check.done = true;
+
+  // assign the arguments, removing checkId and converting
+  // arguments to a native Array object
+  check.args = Array.prototype.slice.call(arguments, 1);
+
   // execute check's listeners (if any)
   this.runAllChecks_(checkId);
-  // set back the check
-  this.checks_[checkId] = check;
 
   // check if all checks are done
   if (this.isChecksComplete_()) {
@@ -505,7 +539,7 @@ ss.ready.C.prototype._runAll = function()
   for (var fnid in this.fn_) {
     if (ss.ready.isFunction(this.fn_[fnid].fn)) {
       // exec callback method
-      this.fn_[fnid].fn();
+      this.fn_[fnid].fn.call(this.fn_[fnid].selfObj, this);
     }
     this.delete_(this.fn_, fnid);
   }
@@ -529,11 +563,16 @@ ss.ready.C.prototype.runAllChecks_ = function(checkId)
     chObj = this.fn_Check_[checkId][ch];
     if (ss.ready.isFunction(chObj.fn)) {
       // found a listener for this check
-      chObj.fn();
+      chObj.fn.apply(chObj.selfObj, this.getArgs(checkId));
     }
     this.delete_(this.fn_Check_[checkId], ch);
   }
   this.delete_(this.fn_Check_, checkId);
+};
+
+ss.ready.C.prototype.getArgs = function(checkId)
+{
+  return this.checks_[checkId].args;
 };
 
 /**
@@ -571,6 +610,7 @@ if (COMPILED) {
   c['isDone'] = c.isDone;
   c['isDoneCheck'] = c.isDoneCheck;
   c['dispose'] = c.dispose;
+  c['getArgs'] = c.getArgs;
 
   r['C'].prototype = c;
 

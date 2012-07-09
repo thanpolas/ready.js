@@ -97,6 +97,9 @@ test('Core functionality', function() {
   // a done ready watch should execute synchronously the listener
   niam.addListener(hookFive);
 
+  // try to trick the lib with dummy check call
+  niam.check('not exist');
+
   start();
 
 });
@@ -381,5 +384,131 @@ test('reset and Dispose method', function(){
 
   // try to run the last check...
   r.check('check One');
+
+});
+
+
+test('arguments and callbacks', function(){
+
+  expect( 28 );
+
+  var pass = 1;
+
+  var mockArgs = [4, 'foo', {a:1, b:{c:2}, d:'go'}];
+
+  function hookCheckOne(arg1, arg2, arg3)
+  {
+    equal(arg1, mockArgs[0], 'Comparing arg1. Pass:' + pass);
+    equal(arg2, mockArgs[1], 'Comparing arg2. Pass:' + pass);
+    deepEqual(arg3, mockArgs[2], 'Comparing arg3. Pass:' + pass);
+    equal(arguments.length, 3, 'checkOne hook must have 3 arguments. Pass:' + pass);
+  }
+
+  function hookOne(ready)
+  {
+    var newReady = ss.ready('go');
+
+    ok(ready instanceof ss.ready.C, 'ready argument is instance of ready class. Pass:' + pass);
+    deepEqual(ready, newReady, 'Deep comparing ready instances. Pass:' + pass);
+
+    deepEqual(ready.getArgs('checkOne'), mockArgs, 'deep comparing checkOne arguments. Pass:' + pass);
+
+    equal(ready.getArgs('checkOne').length, 3, 'checkOne args must be 3. Pass:' + pass);
+
+    var checkTwoArgs = ready.getArgs('checkTwo');
+    strictEqual(checkTwoArgs[1], null, 'Second arg of checkTwo is null. Pass:' + pass);
+    equal(checkTwoArgs.length, 2, 'checkTwo has 2 total args. Pass:' + pass);
+
+    var checkThreeArgs = ready.getArgs('checkThree');
+    equal(checkThreeArgs.length, 4, 'checkThree has 4 total args. Pass:' + pass);
+    equal(checkThreeArgs[3], 100, 'checkThree last arg is 100. Pass:' + pass);
+
+    var checkFourArgs = ready.getArgs('checkFour');
+    equal(checkFourArgs.length, 0, 'Check four has no arguments. Pass:' + pass);
+    equal(Object.prototype.toString.call(checkFourArgs), '[object Array]', 'checkFourArgs must be of type array. Pass:' + pass);
+  }
+
+  var r = ss.ready('go')
+    .addCheck('checkOne')
+    .addCheck('checkTwo')
+    .addCheck('checkThree')
+    .addCheck('checkFour');
+
+  r.addCheckListener('checkOne', hookCheckOne);
+  r.addListener(hookOne);
+
+  r.check.apply(r, Array.prototype.concat('checkOne', mockArgs));
+
+  r.check('checkTwo', false, null);
+
+  r.checkThree('foo', 'bar', 'baz', 100);
+
+  r.checkFour();
+
+  // call a lazy hook
+  pass++;
+  r.addListener(hookOne);
+
+  // and a lazy check hook
+  r.addCheckListener('checkOne', hookCheckOne);
+
+});
+
+test('Check callback binding', function(){
+  expect( 12 );
+
+  // create a pseudo class
+  var AwesomeClass = function(opt_val) {
+    this.val = opt_val || 1;
+  };
+  AwesomeClass.prototype.add = function(val) {
+    this.val += val;
+  };
+  AwesomeClass.prototype.get = function() {
+    return this.val;
+  };
+
+  var ac = new AwesomeClass(5);
+  ac.add(4);
+
+  var acTwo = new AwesomeClass(3);
+  acTwo.add(3);
+
+
+  function hookCheckOne()
+  {
+    ok(this instanceof AwesomeClass, 'this object is an instance of AwesomeClass');
+    equal(this.get(), 9, '.get() method of this should return 9');
+    this.add(3);
+  }
+
+  function hookTwo()
+  {
+    ok(this instanceof AwesomeClass, 'this object is an instance of AwesomeClass -two');
+    equal(this.get(), 6, '.get() method of this should return 6');
+  }
+
+  function hookThree()
+  {
+    ok(this instanceof AwesomeClass, 'this object is an instance of AwesomeClass -three');
+    equal(this.get(), 12, '.get() method of this should return 12');
+  }
+
+  var r = ss.ready('bind')
+    .addCheck('one')
+    .addCheck('two');
+
+  r.addCheckListener('one', hookCheckOne, ac);
+  r.addListener(hookTwo, acTwo);
+  r.addListener(hookThree, ac);
+
+  r.check('one');
+  r.two();
+
+  // call everything lazily
+  ac.add(-3);
+  r.addCheckListener('one', hookCheckOne, ac);
+  r.addListener(hookTwo, acTwo);
+  r.addListener(hookThree, ac);
 
 });
