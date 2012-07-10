@@ -159,62 +159,6 @@ test('Sequence of execution', function() {
   }, 80);
 });
 
-
-test('Canceling listeners', function() {
-  expect( 4 );
-
-  stop();
-
-  var seq = 1;
-
-  function addHook(testSeq, title, opt_done)
-  {
-    return function(){
-      equal(seq, testSeq, title);
-      seq++;
-      if (opt_done) {
-        start();
-      }
-    };
-  }
-
-  function addFalseHook(title)
-  {
-    return function(){
-      ok(false, title);
-      start();
-    };
-
-  }
-
-  var r = ss.ready('a-ready-watch-rumble');
-
-  // add checks
-  r.addCheck('task1');
-  r.addCheck('task2');
-  r.addCheck('task3');
-
-  // add listeners
-  r.addListener(addHook(1, 'First main hook executed'));
-  r.addListener(addHook(2, 'Second main hook executed'));
-  r.addListener(addHook(3, 'Lazy hook executed'));
-  r.addListener(addHook(4, 'Very lazy hook executed', true));
-  var removeOne = r.addListener(addFalseHook('First removed hook'));
-  var removeTwo = r.addListener(addFalseHook('Second removed hook'));
-  var removeThree = r.addCheckListener('task1', addFalseHook('Third removed check hook'));
-  var removeFour = r.addCheckListener('task1', addFalseHook('Fourth removed check hook'));
-
-  r.check('task2');
-  ss.ready('a-ready-watch-rumble').check('task3');
-  r.removeListener(removeOne);
-  ss.ready('a-ready-watch-rumble').removeListener(removeTwo);
-  r.removeCheckListener(removeThree);
-  ss.ready('a-ready-watch-rumble').removeCheckListener(removeFour);
-  r.check('task1');
-});
-
-
-
 test('Multiple Ready Watches', function() {
 
   expect( 28 );
@@ -307,13 +251,12 @@ test('Checks as function and chaining', function(){
 
   var r = ss.ready('aWatch');
   var oddName = 'dashes-not-allowed-as-func-names';
-  r.addCheck('aCheck').addCheck(oddName);
-
-  r.addListener(readyOne);
-  r.addCheckListener('aCheck', checkOne);
-
-  // execution on an instance
-  r.aCheck();
+  r.addCheck('aCheck')
+    .addCheck(oddName)
+    .addListener(readyOne)
+    .addCheckListener('aCheck', checkOne)
+    // execution on an instance
+    .aCheck();
   // execution from builder
   ss.ready('aWatch')[oddName]();
 });
@@ -340,13 +283,11 @@ test('Early listeners and heavy chaining', function(){
   var checkTwo = 'check Two';
 
   r.addCheck('check One') // add check
-    .addCheckListener(checkTwo, hookTwo); // chain addCheckListener
-
-  r.addCheck(checkTwo); // addCheck
-  r[checkTwo](); // chain check execution (check done)
-  r.addListener(hookThree); // chain addListener
-
-  r.check('check One');
+    .addCheckListener(checkTwo, hookTwo) // chain addCheckListener
+    .addCheck(checkTwo);
+  ss.ready('a silly name')[checkTwo]() // chain check execution (check done)
+    .addListener(hookThree) // chain addListener
+    .check('check One');
 });
 
 test('reset and Dispose method', function(){
@@ -373,11 +314,10 @@ test('reset and Dispose method', function(){
   var checkTwo = 'check Two';
 
   r.addCheck('check One')
-    .addCheckListener(checkTwo, hookTwo); // chain addCheckListener
-
-  r.addCheck(checkTwo); // addCheck
-  r[checkTwo](); // chain check execution (check done)
-  r.addListener(hookThree); // chain addListener
+    .addCheckListener(checkTwo, hookTwo) // chain addCheckListener
+    .addCheck(checkTwo); // addCheck
+  ss.ready('a silly name')[checkTwo]() // chain check execution (check done)
+    .addListener(hookThree); // chain addListener
 
   // dispose
   ss.ready('a silly name').dispose();
