@@ -8,8 +8,8 @@ Run ready.js on the **browser** and **node.js**!
 
 ## Contents
 
-* [Getting Started](#getting_started)
-* [The Concept](#the_concept)
+* [Getting Started](#getting-started)
+* [The Concept](#the-concept)
 * [Documentation](#documentation)
 * [Examples](#examples)
 * [License - Apache2](#license)
@@ -114,6 +114,18 @@ ready.js is pretty flexible, you can add listeners at any point in the lifespan 
 
 In the browser, you can find ready.js in the `ss.ready` namespace, or if you run on node.js do a `require('asyncready.js');`.
 
+### Documentation Contents
+
+* [ss.ready(name | function, opt_forceInit)](#ssreadyname--function-opt_forceinit) : Get a new or existing ready instance.
+* [.addCheck(checkId)](#addcheckcheckid) : Add a check to the *ready watch*.
+* [.check(checkId, var_args)](#checkcheckid-var_args) : Mark a *check* as done.
+* [.addListener(fn, opt_selfObj)](#addlistenerfn-opt_selfobj) : Add a listener the *ready watch* completion.
+* [.addCheckListener(checkId, fn, opt_selfObj)](#addchecklistenercheckid-fn-opt_selfobj) : Add a listener on the completion of a specific *check*.
+* [.getArgs(checkId)](#getargscheckid) : Get arguments passed to a *check*.
+* [.isDone(), .isCheckDone(checkId)](#isdone-ischeckdonecheckid) : Query if a *ready watch* or a specific *check* have finished.
+* [.dispose()](#dispose) : Dispose all references of the ready instance.
+* [STATIC: ss.ready.reset()](#static-ssreadyreset) : Hard core delete action!
+
 ### ss.ready(name | function, opt_forceInit)
 
 **Returns**: Ready Instance
@@ -122,7 +134,7 @@ In the browser, you can find ready.js in the `ss.ready` namespace, or if you run
 
 The `opt_forceInit` option is a boolean which if set to true, will force re-initialization of the *watch*. A nice example of how to use it can be found in [Example 3](#example-3-ready-watch-inside-a-repeative-callback).
 
-If the first parameter is a *function* then `ss.ready` poses as [`.addListener`](#addlistenerfn) and attaches to the **'main'** watch. The *main watch* is hardcoded into the library and uses the name `main`.
+If the first parameter is a *function* then `ss.ready` poses as [`.addListener`](#addlistenerfn-opt_selfobj) and attaches to the **'main'** watch. The *main watch* is hardcoded into the library and uses the name `main`.
 
 You can access the default *'main'* watch with `ss.ready('main')` or plainly `ss.ready()`
 
@@ -132,7 +144,7 @@ You can access the default *'main'* watch with `ss.ready('main')` or plainly `ss
 
 `.addCheck(checkId)` adds a *check* to the *ready watch*. Make sure `checkId` is a string or has a `.toString()` method.
 
-Each *check* that is added, has to be *checked* (aka finished) with the [`.check(checkId)`](#checkcheckidvar_args) call.
+Each *check* that is added, has to be *checked* (aka finished) with the [`.check(checkId)`](#checkcheckid-var_args) call.
 
 `addCheck` returns the self instance so you can chain it.
 
@@ -167,9 +179,9 @@ r.localDone();
 
 `check` returns the self instance so you can chain it.
 
-`check` can trigger execution of listeners if it's the last one of the *checks* to finish or if we have attached a [checkListener](#addchecklistenercheckid-fn) for this check.
+`check` can trigger execution of listeners if it's the last one of the *checks* to finish or if we have attached a [checkListener](#addchecklistenercheckid-fn-opt_selfobj) for this check.
 
-You can pass any number or parameters and they can be accessed via the [getArgs](#getArgs) method.
+You can pass any number or parameters and they can be accessed via the [getArgs](#getargscheckid) method.
 
 ### .addListener(fn, opt_selfObj)
 
@@ -181,7 +193,7 @@ Adds a listener for the completion of the current *ready watch*. `fn` has to be 
 
 Optionally you can set an object to apply on the executed listener.
 
-Each listener that is executed gets passed the Ready Instance as a parameter. The Ready Instance is particularly usefull to query ([getArgs](#getArgs)) for the parameters that were passed on each check that was executed.
+Each listener that is executed gets passed the Ready Instance as a parameter. The Ready Instance is particularly usefull to query ([getArgs](#getargscheckid)) for the parameters that were passed on each check that was executed.
 
 ```javascript
 var r = ss.ready('appReady');
@@ -208,7 +220,7 @@ Adds a listener for the completion of the specified *check*.
 
 Optionally you can set an object to apply on the executed listener.
 
-Each Check listener that is executed has aguments as they were passed to the [check](#check_checkId_var_args) call.
+Each Check listener that is executed has aguments as they were passed to the [check](#checkcheckid-var_args) call.
 
 ```javascript
 var r = ss.ready('go ready go');
@@ -234,7 +246,7 @@ ss.ready('go ready go').theCheck(true, 'foo');
 
 **Returns**: Array
 
-Returns an array of arguments passed to a [check](#check) identified by *checkId*.
+Returns an array of arguments passed to a [check](#checkcheckid-var_args) identified by *checkId*.
 
 ```javascript
 var r = ss.ready('appReady');
