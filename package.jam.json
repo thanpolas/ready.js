@@ -31,6 +31,7 @@
     "test": "grunt test"
   },
   "dependencies": {
+    "qunit2node": "~0.3.2"
     },
   "devDependencies": {
 
