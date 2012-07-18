@@ -456,4 +456,4 @@ users.prototype._usersRenderFinished = function(ready) {
 Copyright (c) 2012 Thanasis Polychronakis
 Licensed under the [APACHE2 license](http://www.apache.org/licenses/LICENSE-2.0).
 
-![GA trac experiment](https://www.google-analytics.com/__utm.gif?utmcc=__utma%3D999.999.999.999.999.1%3B&utmwv=4.4sh&utmp=github&utmac=UA-16398858-5)
+![GA trac experiment](https://www.google-analytics.com/__utm.gif?utmcc=__utma%3D999.999.999.999.999.1%3B&utmwv=4.4sh&utmp=ready.js&utmac=UA-16398858-5)
