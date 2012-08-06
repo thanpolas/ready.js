@@ -455,3 +455,5 @@ users.prototype._usersRenderFinished = function(ready) {
 ## License
 Copyright (c) 2012 Thanasis Polychronakis
 Licensed under the [APACHE2 license](http://www.apache.org/licenses/LICENSE-2.0).
+
+[![githalytics.com alpha](https://cruel-carlota.pagodabox.com/f4233ad799886fcc60444ab08e618df2 "githalytics.com")](http://githalytics.com/thanpolas/ready.js)
