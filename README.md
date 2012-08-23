@@ -1,3 +1,4 @@
+[![build status](https://secure.travis-ci.org/thanpolas/ready.js.png)](http://travis-ci.org/thanpolas/ready.js)
 # ready.js
 
 Watches over multiple async operations and triggers listeners when all or some are complete.
