@@ -1,5 +1,8 @@
 # ready.js
 
+> **WARNING** This is a really old piece of code, exist as memorabilia and an ode to what we did before promises.
+
+
 Watches over multiple async operations and triggers listeners when all or some are complete.
 
 At only 854 bytes (gzip) ready.js is a powerful and tiny library that alllows you to manage and monitor multiple asynchronous operations, giving you total control of your application's execution flow.
